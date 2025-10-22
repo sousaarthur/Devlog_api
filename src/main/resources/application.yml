@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql:localhost:5432/postgres
+    username: postgres
+    password: postgres
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.hibernate.default_schema: blog_db
+  flyway:
+    enabled: true
+    schemas: blog_db
+    table: flyway_schema_history
