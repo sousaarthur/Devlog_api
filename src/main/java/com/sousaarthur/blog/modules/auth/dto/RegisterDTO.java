@@ -5,6 +5,7 @@ import com.sousaarthur.blog.modules.auth.model.UserRole;
 public record RegisterDTO(
         String login,
         String password,
-        UserRole role
+        UserRole role,
+        boolean active
 ) {
 }

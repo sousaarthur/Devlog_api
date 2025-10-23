@@ -34,8 +34,6 @@ public class AuthenticationController {
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO dto){
         var usernamePassword = new UsernamePasswordAuthenticationToken(dto.login(), dto.password());
         var auth = this.authenticationManager.authenticate(usernamePassword);
-
-
         var token = tokenService.generateToken((Login) auth.getPrincipal());
         return  ResponseEntity.ok(new LoginResponseDTO(token));
     }
@@ -46,7 +44,7 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().build();
         }
         String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
-        Login newLogin = new Login(dto.login(), encryptedPassword, dto.role());
+        Login newLogin = new Login(dto.login(), encryptedPassword, dto.role(), dto.active());
 
         this.repository.save(newLogin);
         return ResponseEntity.ok().build();

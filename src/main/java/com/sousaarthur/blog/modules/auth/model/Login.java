@@ -25,11 +25,13 @@ public class Login implements UserDetails {
     private String login;
     private String password;
     private UserRole role;
+    private boolean active;
 
-    public Login(String login, String password, UserRole role){
+    public Login(String login, String password, UserRole role, boolean active){
         this.login = login;
         this.password = password;
         this.role = role;
+        this.active = active;
     }
 
     @Override
@@ -46,5 +48,10 @@ public class Login implements UserDetails {
     @Override
     public String getUsername() {
         return login;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return active;
     }
 }
