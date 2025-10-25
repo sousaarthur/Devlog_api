@@ -20,18 +20,18 @@ import java.util.List;
 @NoArgsConstructor
 public class Login implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     private String login;
     private String password;
     private UserRole role;
     private boolean active;
 
-    public Login(String login, String password, UserRole role, boolean active){
+    public Login(String login, String password, UserRole role){
         this.login = login;
         this.password = password;
         this.role = role;
-        this.active = active;
+        this.active = true;
     }
 
     @Override

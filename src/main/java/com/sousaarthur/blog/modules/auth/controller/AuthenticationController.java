@@ -6,6 +6,8 @@ import com.sousaarthur.blog.modules.auth.dto.LoginResponseDTO;
 import com.sousaarthur.blog.modules.auth.dto.RegisterDTO;
 import com.sousaarthur.blog.modules.auth.model.Login;
 import com.sousaarthur.blog.modules.auth.repository.LoginRepository;
+import com.sousaarthur.blog.modules.user.model.User;
+import com.sousaarthur.blog.modules.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +19,23 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RestController
-@RequestMapping("auth")
+@RequestMapping("api/auth")
 public class AuthenticationController {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
     private LoginRepository repository;
-
-    @Autowired
     private TokenService tokenService;
+    private UserRepository userRepository;
+
+    public AuthenticationController(AuthenticationManager authenticationManager, LoginRepository repository, TokenService tokenService, UserRepository userRepository) {
+        this.authenticationManager = authenticationManager;
+        this.repository = repository;
+        this.tokenService = tokenService;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO dto){
@@ -44,9 +51,10 @@ public class AuthenticationController {
             return ResponseEntity.badRequest().build();
         }
         String encryptedPassword = new BCryptPasswordEncoder().encode(dto.password());
-        Login newLogin = new Login(dto.login(), encryptedPassword, dto.role(), dto.active());
+        Login login = new Login(dto.login(), encryptedPassword, dto.role());
+        User user = new User(dto.name(), login);
 
-        this.repository.save(newLogin);
+        this.userRepository.save(user);
         return ResponseEntity.ok().build();
     }
 }
