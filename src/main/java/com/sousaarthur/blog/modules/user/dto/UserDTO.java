@@ -1,5 +1,6 @@
 package com.sousaarthur.blog.modules.user.dto;
 
+import com.sousaarthur.blog.modules.auth.model.UserRole;
 import com.sousaarthur.blog.modules.user.model.User;
 import lombok.Builder;
 
@@ -10,7 +11,9 @@ public record UserDTO(
         String bio,
         String avatar,
         String linkedin,
-        String github
+        String github,
+        String email,
+        UserRole role
 ) {
     public static UserDTO toDTO(User model){
         return UserDTO.builder()
@@ -20,6 +23,8 @@ public record UserDTO(
                 .avatar(model.getAvatar())
                 .linkedin(model.getLinkedin())
                 .github(model.getGithub())
+                .email(model.getLogin().getLogin())
+                .role(model.getLogin().getRole())
                 .build();
     }
 }

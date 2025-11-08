@@ -1,6 +1,7 @@
 package com.sousaarthur.blog.modules.auth.controller;
 
 import com.sousaarthur.blog.config.security.TokenService;
+import com.sousaarthur.blog.exception.EventNotFoundException;
 import com.sousaarthur.blog.modules.auth.dto.AuthenticationDTO;
 import com.sousaarthur.blog.modules.auth.dto.LoginResponseDTO;
 import com.sousaarthur.blog.modules.auth.dto.RegisterDTO;
@@ -10,6 +11,8 @@ import com.sousaarthur.blog.modules.user.model.User;
 import com.sousaarthur.blog.modules.user.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,20 +32,28 @@ public class AuthenticationController {
     private LoginRepository repository;
     private TokenService tokenService;
     private UserRepository userRepository;
+    private MessageSource messageSource;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, LoginRepository repository, TokenService tokenService, UserRepository userRepository) {
+    public AuthenticationController(AuthenticationManager authenticationManager, LoginRepository repository, TokenService tokenService, UserRepository userRepository, MessageSource messageSource) {
         this.authenticationManager = authenticationManager;
         this.repository = repository;
         this.tokenService = tokenService;
+        this.messageSource = messageSource;
         this.userRepository = userRepository;
     }
 
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO dto){
-        var usernamePassword = new UsernamePasswordAuthenticationToken(dto.login(), dto.password());
-        var auth = this.authenticationManager.authenticate(usernamePassword);
-        var token = tokenService.generateToken((Login) auth.getPrincipal());
-        return  ResponseEntity.ok(new LoginResponseDTO(token));
+        try{
+            var usernamePassword = new UsernamePasswordAuthenticationToken(dto.login(), dto.password());
+            var auth = this.authenticationManager.authenticate(usernamePassword);
+            var token = tokenService.generateToken((Login) auth.getPrincipal());
+            return  ResponseEntity.ok(new LoginResponseDTO(token));
+        } catch (Exception e){
+         throw new EventNotFoundException(
+                 messageSource.getMessage("invalid.credentials", null, LocaleContextHolder.getLocale())
+         );
+        }
     }
 
     @PostMapping("/register")

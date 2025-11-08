@@ -32,6 +32,7 @@ public class User {
 
     public User(String name, Login login){
         this.name = name;
+        this.avatar = "https://res.cloudinary.com/devlog/image/upload/v1762057236/r09mi2wzl04exz3hu5pp.jpg";
         this.login = login;
         this.createdAt = LocalDateTime.now();
     }

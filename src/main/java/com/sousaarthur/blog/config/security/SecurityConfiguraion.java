@@ -36,10 +36,11 @@ public class SecurityConfiguraion {
 
                         // Rotas de Usuários
                         .requestMatchers("/api/user/**").hasRole("WRITER")
+                        .requestMatchers("/api/images/upload").hasAnyRole("ADMIN", "WRITER")
 
                         // Rotas publicas
                         .requestMatchers("/api/public/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
