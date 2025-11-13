@@ -12,12 +12,10 @@ import org.springframework.web.servlet.HandlerMapping;
 @RequestMapping("api/user")
 public class UserController {
 
-    private final HandlerMapping resourceHandlerMapping;
     private UserService service;
 
-    public UserController(UserService service, HandlerMapping resourceHandlerMapping){
+    public UserController(UserService service){
         this.service = service;
-        this.resourceHandlerMapping = resourceHandlerMapping;
     }
 
     @PutMapping
@@ -33,13 +31,13 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity delete(){
+    public ResponseEntity<Boolean> delete(){
         boolean active = service.delete();
         return ResponseEntity.ok(active);
     }
 
     @PostMapping("/changePassword")
-    public ResponseEntity changePassword(@RequestBody ChangePasswordDTO dto){
+    public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordDTO dto){
         boolean changePassword = service.changePassword(dto);
         if(!changePassword){
             return ResponseEntity.badRequest().build();

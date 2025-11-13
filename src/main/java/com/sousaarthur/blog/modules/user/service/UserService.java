@@ -1,13 +1,20 @@
 package com.sousaarthur.blog.modules.user.service;
 
 import com.sousaarthur.blog.exception.EventSizeException;
+import com.sousaarthur.blog.exception.UserNotAuthorizedException;
+import com.sousaarthur.blog.modules.auth.model.UserRole;
 import com.sousaarthur.blog.modules.auth.repository.LoginRepository;
 import com.sousaarthur.blog.modules.user.dto.ChangePasswordDTO;
 import com.sousaarthur.blog.modules.user.dto.UserDTO;
+import com.sousaarthur.blog.modules.user.model.User;
 import com.sousaarthur.blog.modules.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,12 +39,17 @@ public class UserService {
         this.messageSource = messageSource;
     }
 
+    public UserDTO findById(int id){
+        User user = userRepository.getReferenceById(id);
+       return UserDTO.toDTO(user);
+    }
+
     public UserDTO update(UserDTO dto) {
         var user = authUser.getUser();
         if(dto.name() != null){
             if(dto.name().length() > 20){
                 throw new EventSizeException(
-                        messageSource.getMessage("name.size.invalid", new Object[]{20}, getLocale())
+                        messageSource.getMessage("name.size.invalid", new Object[]{20}, LocaleContextHolder.getLocale())
                 );
             }
             user.setName(dto.name());
@@ -100,7 +112,27 @@ public class UserService {
         }
     }
 
-    public Locale getLocale() {
-        return LocaleContextHolder.getLocale();
+    public Page<UserDTO> listAllUsers(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
+        Page<User> usersPage = userRepository.findAll(pageable);
+        return usersPage.map(UserDTO::toDTO);
+    }
+
+    public boolean toggleUserStatus(int id){
+        var target = authUser.getLoginById(id);
+        var requester = authUser.getLogin();
+        if (requester.getId().equals(target.getId())) {
+            throw new UserNotAuthorizedException("Você não pode desativar sua própria conta.");
+        }
+        if (
+                target.getRole() == UserRole.ADMIN && requester.getRole() != UserRole.OWNER ||
+                target.getRole() == UserRole.OWNER && requester.getRole() == UserRole.ADMIN ||
+                target.getRole() == UserRole.OWNER && requester.getRole() == UserRole.OWNER
+        ) {
+            throw new UserNotAuthorizedException("Você não tem permissão para desativar usuários com cargo igual ou superior ao seu.");
+        }
+        target.setActive(!target.isEnabled());
+        this.loginRepository.save(target);
+        return true;
     }
 }

@@ -36,7 +36,9 @@ public class Login implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if(this.role == UserRole.ADMIN){
+        if(this.role == UserRole.OWNER){
+            return List.of(new SimpleGrantedAuthority("ROLE_OWNER"), new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_WRITER"), new SimpleGrantedAuthority("ROLE_READER"));
+        } else if(this.role == UserRole.ADMIN){
             return List.of(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_WRITER"), new SimpleGrantedAuthority("ROLE_READER"));
         } else if(this.role == UserRole.WRITER){
             return List.of(new SimpleGrantedAuthority("ROLE_WRITER"), new SimpleGrantedAuthority("ROLE_READER"));

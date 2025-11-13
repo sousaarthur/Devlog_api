@@ -3,8 +3,11 @@ package com.sousaarthur.blog.config;
 import com.sousaarthur.blog.exception.EventNotFoundException;
 import com.sousaarthur.blog.exception.EventSizeException;
 import com.sousaarthur.blog.exception.RestErrorMessage;
+import com.sousaarthur.blog.exception.UserNotAuthorizedException;
+import org.apache.coyote.Response;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -30,7 +33,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .status(HttpStatus.NOT_FOUND.value())
                 .message(ex.getMessage())
                 .build();
-
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
@@ -81,7 +83,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
-    public Locale getLocale(){
-        return Locale.getDefault();
+    @ExceptionHandler(UserNotAuthorizedException.class)
+    public ResponseEntity<RestErrorMessage> handleUserNotAuthorizedException(UserNotAuthorizedException ex) {
+        var error = RestErrorMessage.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }

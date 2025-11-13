@@ -5,6 +5,7 @@ import com.sousaarthur.blog.modules.user.dto.UserDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +24,7 @@ public class User {
     @Column(name = "avatar_url")
     private String avatar;
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
     private String linkedin;
     private String github;
     @OneToOne(cascade = CascadeType.ALL)
@@ -34,7 +35,7 @@ public class User {
         this.name = name;
         this.avatar = "https://res.cloudinary.com/devlog/image/upload/v1762057236/r09mi2wzl04exz3hu5pp.jpg";
         this.login = login;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now().toLocalDate();
     }
 
     public User(UserDTO dto, Login login){

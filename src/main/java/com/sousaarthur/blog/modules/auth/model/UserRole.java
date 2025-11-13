@@ -3,7 +3,8 @@ package com.sousaarthur.blog.modules.auth.model;
 public enum UserRole {
     ADMIN("admin"),
     WRITER("writer"),
-    READER("reader");
+    READER("reader"),
+    OWNER("owner");
 
     private String role;
 

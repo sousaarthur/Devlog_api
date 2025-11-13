@@ -21,6 +21,11 @@ public class AuthenticatedUser {
         return (Login) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
+    public Login getLoginById(int id) {
+        return loginRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+    }
+
     public User getUser() {
         Login login = getLogin();
         return userRepository.findByLoginId(login.getId())

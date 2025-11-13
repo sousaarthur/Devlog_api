@@ -4,6 +4,8 @@ import com.sousaarthur.blog.modules.auth.model.UserRole;
 import com.sousaarthur.blog.modules.user.model.User;
 import lombok.Builder;
 
+import java.time.LocalDate;
+
 @Builder
 public record UserDTO(
         Integer id,
@@ -13,7 +15,10 @@ public record UserDTO(
         String linkedin,
         String github,
         String email,
-        UserRole role
+        UserRole role,
+        boolean status,
+        LocalDate createdAt
+
 ) {
     public static UserDTO toDTO(User model){
         return UserDTO.builder()
@@ -25,6 +30,8 @@ public record UserDTO(
                 .github(model.getGithub())
                 .email(model.getLogin().getLogin())
                 .role(model.getLogin().getRole())
+                .status(model.getLogin().isActive())
+                .createdAt(model.getCreatedAt())
                 .build();
     }
 }
