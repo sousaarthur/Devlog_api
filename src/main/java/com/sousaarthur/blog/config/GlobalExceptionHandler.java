@@ -1,8 +1,6 @@
 package com.sousaarthur.blog.config;
 
-import com.sousaarthur.blog.exception.EventNotFoundException;
-import com.sousaarthur.blog.exception.EventSizeException;
-import com.sousaarthur.blog.exception.RestErrorMessage;
+import com.sousaarthur.blog.exception.*;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +72,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(EventSizeException.class)
     public ResponseEntity<RestErrorMessage> hadleEventSizeException(EventSizeException ex){
+        var error = RestErrorMessage.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<RestErrorMessage> handleCategoryNotFoundException(CategoryNotFoundException ex) {
+        var error = RestErrorMessage.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .message(ex.getMessage())
+                .build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(IllegalCategoryCreateException.class)
+    public ResponseEntity<RestErrorMessage> handleIllegalCategoryCreateException (IllegalCategoryCreateException ex){
         var error = RestErrorMessage.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message(ex.getMessage())
