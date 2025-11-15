@@ -2,6 +2,7 @@ package com.sousaarthur.blog.modules.category.service;
 
 import com.sousaarthur.blog.exception.CategoryNotFoundException;
 import com.sousaarthur.blog.exception.IllegalCategoryCreateException;
+import com.sousaarthur.blog.modules.category.dto.UpdateCategoryDTO;
 import com.sousaarthur.blog.modules.category.model.Category;
 import com.sousaarthur.blog.modules.category.dto.CategoryResponseDTO;
 import com.sousaarthur.blog.modules.category.repository.CategoryRepository;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -20,9 +23,21 @@ public class CategoryService {
     public CategoryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
+    public List<CategoryResponseDTO> getAllCategories(){
+        return categoryRepository.findAll()
+                .stream()
+                .map(c -> CategoryResponseDTO.toDTO(c))
+                .collect(Collectors.toList());
+    }
 
     public CategoryResponseDTO getCategory(Integer id) {
         var category = categoryRepository.findById(id);
+        if(!category.isPresent()) throw new CategoryNotFoundException();
+        return CategoryResponseDTO.toDTO(category.get());
+    }
+
+    public CategoryResponseDTO getCategory(String categoryName) {
+        var category = categoryRepository.findByNameCategory(categoryName);
         if(!category.isPresent()) throw new CategoryNotFoundException();
         return CategoryResponseDTO.toDTO(category.get());
     }
@@ -46,13 +61,13 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryResponseDTO updateCategory(Integer id, String categoryName) throws InvalidNameException {
-        var categoryTarget = categoryRepository.findById(id).get();
-        if (!isCategoryExists(categoryName) == true) {
+    public CategoryResponseDTO updateCategory(UpdateCategoryDTO dto) throws InvalidNameException {
+        var categoryTarget = categoryRepository.findById(dto.id()).get();
+        if (!isCategoryExists(dto.name()) == true) {
             throw new IllegalCategoryCreateException();
         }
-        if (categoryName.isEmpty()){
-            categoryTarget.setName(categoryName);
+        if (dto.name().isEmpty()){
+            categoryTarget.setName(dto.name());
         }
         categoryRepository.save(categoryTarget);
         return CategoryResponseDTO.toDTO(categoryTarget);
@@ -91,17 +106,14 @@ public class CategoryService {
 
     /* Não foi adicionado um metodo para excluir, pois pensando na logica de relacioanemnto, isso acarretaria em problemas de atomicidade no banco */
     // TODO: Gerar slug, considerando questões como categorias com nomes compostos, com valores numericos e etc
-    private String generateSlug(String categoryName){
-        // Receba os valores do nome da categoria
-        // Retire os espaços em branco
+    protected String generateSlug(String categoryName){
         categoryName = categoryName.replaceAll("[^a-zA-Z0-9]", "");
-        // Retire os valores especiais
         categoryName = categoryName.replaceAll("\\s+", "-");
         return categoryName.toLowerCase();
     }
 
     // TODO: Garantir que não tenham categorias sobrepostas
-    private boolean isCategoryExists(String name){
+    protected boolean isCategoryExists(String name){
         var category = categoryRepository.findByNameCategory(name);
         if (category.isPresent()) return true;
         return false;
