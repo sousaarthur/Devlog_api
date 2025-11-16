@@ -2,12 +2,11 @@ package com.sousaarthur.blog.modules.category.controller;
 
 import com.sousaarthur.blog.modules.category.dto.CategoryResponseDTO;
 import com.sousaarthur.blog.modules.category.dto.UpdateCategoryDTO;
-import com.sousaarthur.blog.modules.category.dto.createCategoryDTO;
+import com.sousaarthur.blog.modules.category.dto.CreateCategoryDTO;
 import com.sousaarthur.blog.modules.category.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.InvalidNameException;
@@ -29,26 +28,28 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(categories);
     }
 
-    /**
-     * Recebe o nome ou o id da categoria e o retorna*/
+    @GetMapping("{id}")
+    public ResponseEntity<CategoryResponseDTO> getCategoryById (@PathVariable("id") int id){
+        var category = categoryService.getCategory(id);
+        return ResponseEntity.status(HttpStatus.OK).body(category);
+    }
+
     @GetMapping
-    public ResponseEntity<CategoryResponseDTO> getCategory(
-            @RequestParam(value = "id", required = false) Integer id,
-            @RequestParam(value = "name", required = false, defaultValue = "") String name
+    public ResponseEntity<List<CategoryResponseDTO>> getCategories(
+            @RequestParam(value = "name", required = false, defaultValue = "") String name,
+            @RequestParam(value = "slug", required = false, defaultValue = "") String slug
     ){
-        CategoryResponseDTO category;
+        List<CategoryResponseDTO> category;
 
         if (!name.isEmpty()){
-            category = categoryService.getCategory(name);
-        } else if (id != null){
-            category = categoryService.getCategory(id);
+            category = categoryService.getCategoriesByName(name);
         }  else {
             return ResponseEntity.badRequest().build();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(category);
     }
-
+// Essa parte foi comentada pois optei por puxar dinamicamente as categorias via query. Exemplo: api/category?name=frontend&id=1
 //    @RequestMapping("/{id}")
 //    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable("id") int id){
 //        var category = categoryService.getCategory(id);
@@ -62,7 +63,7 @@ public class CategoryController {
 //    }
 
     @PostMapping("/create")
-    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody createCategoryDTO dto) throws InvalidNameException {
+    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody CreateCategoryDTO dto) throws InvalidNameException {
         var category = categoryService.createCategory(dto.name());
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }

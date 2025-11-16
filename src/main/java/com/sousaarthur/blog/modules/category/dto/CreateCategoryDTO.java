@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
-public record createCategoryDTO(
+public record CreateCategoryDTO(
         @NotBlank
         @Size(min = 4, max = 50)
         String name
