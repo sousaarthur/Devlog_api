@@ -12,6 +12,5 @@ public class FlywayConfig {
             flyway.repair();
             flyway.migrate();
         };
-
     }
 }
