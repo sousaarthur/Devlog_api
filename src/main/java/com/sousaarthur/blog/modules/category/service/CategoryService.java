@@ -2,31 +2,43 @@ package com.sousaarthur.blog.modules.category.service;
 
 import com.sousaarthur.blog.exception.CategoryNotFoundException;
 import com.sousaarthur.blog.exception.IllegalCategoryCreateException;
+import com.sousaarthur.blog.modules.category.dto.CategoryResponseDTO;
 import com.sousaarthur.blog.modules.category.dto.UpdateCategoryDTO;
 import com.sousaarthur.blog.modules.category.model.Category;
-import com.sousaarthur.blog.modules.category.dto.CategoryResponseDTO;
 import com.sousaarthur.blog.modules.category.repository.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.naming.InvalidNameException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
 
     private CategoryRepository categoryRepository;
+    private MessageSource messageSource;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, MessageSource messageSource) {
         this.categoryRepository = categoryRepository;
+        this.messageSource = messageSource;
     }
+
     public List<CategoryResponseDTO> getAllCategories(){
         return categoryRepository.findAll()
                 .stream()
-                .map(c -> CategoryResponseDTO.toDTO(c))
+                .map(CategoryResponseDTO::toDTO)
+                .collect(Collectors.toList());
+    }
+    public List<CategoryResponseDTO> getCategoriesByName(String name){
+        return categoryRepository.findByNamePartial(name)
+                .stream()
+                .map(CategoryResponseDTO::toDTO)
                 .collect(Collectors.toList());
     }
 
@@ -42,9 +54,12 @@ public class CategoryService {
         return CategoryResponseDTO.toDTO(category.get());
     }
 
+    @Transactional
     public CategoryResponseDTO createCategory(String categoryName) throws InvalidNameException {
         if (isCategoryExists(categoryName) == true){
-            throw new IllegalCategoryCreateException();
+            throw new IllegalCategoryCreateException(
+                    messageSource.getMessage("illegal.category.create", null, LocaleContextHolder.getLocale())
+            );
         }
 
         if (categoryName == null || categoryName.isEmpty()) {
@@ -53,6 +68,7 @@ public class CategoryService {
         var slug = generateSlug(categoryName);
         var newCategory = new Category();
         newCategory.setName(categoryName);
+        newCategory.setActive(true);
         newCategory.setSlug(slug);
 
         categoryRepository.save(newCategory);
@@ -62,12 +78,14 @@ public class CategoryService {
     @Transactional
     public CategoryResponseDTO updateCategory(UpdateCategoryDTO dto) throws InvalidNameException {
         var categoryTarget = categoryRepository.findById(dto.id()).get();
-        if (!isCategoryExists(dto.name()) == true) {
-            throw new IllegalCategoryCreateException();
-        }
-        if (dto.name().isEmpty()){
+
+        if (!dto.name().isEmpty()){
             categoryTarget.setName(dto.name());
         }
+        if (!dto.slug().isEmpty()){
+            categoryTarget.setSlug(dto.slug());
+        }
+
         categoryRepository.save(categoryTarget);
         return CategoryResponseDTO.toDTO(categoryTarget);
     }
