@@ -1,4 +1,9 @@
 spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
   datasource:
     url: jdbc:postgresql://${DB_HOST}:5432/database?sslmode=require
     username: ${DB_USERNAME}
