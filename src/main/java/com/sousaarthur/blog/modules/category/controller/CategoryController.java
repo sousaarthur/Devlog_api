@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.InvalidNameException;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("api/category")
 public class CategoryController {
     private final CategoryService categoryService;
@@ -62,7 +62,7 @@ public class CategoryController {
 //    }
 
     @PostMapping("/create")
-    public ResponseEntity<CategoryResponseDTO> createCategory(createCategoryDTO dto) throws InvalidNameException {
+    public ResponseEntity<CategoryResponseDTO> createCategory(@RequestBody createCategoryDTO dto) throws InvalidNameException {
         var category = categoryService.createCategory(dto.name());
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }

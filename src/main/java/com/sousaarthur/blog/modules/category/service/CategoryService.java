@@ -37,24 +37,23 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO getCategory(String categoryName) {
-        var category = categoryRepository.findByNameCategory(categoryName);
+        var category = categoryRepository.findByName(categoryName);
         if(!category.isPresent()) throw new CategoryNotFoundException();
         return CategoryResponseDTO.toDTO(category.get());
     }
 
-    @Transactional
     public CategoryResponseDTO createCategory(String categoryName) throws InvalidNameException {
-        if (!isCategoryExists(categoryName) == true){
+        if (isCategoryExists(categoryName) == true){
             throw new IllegalCategoryCreateException();
         }
 
-        if (categoryName == null && categoryName.isEmpty()) {
+        if (categoryName == null || categoryName.isEmpty()) {
             throw new InvalidNameException("Nome de categoria invalido");
         }
-
+        var slug = generateSlug(categoryName);
         var newCategory = new Category();
         newCategory.setName(categoryName);
-        newCategory.setSlug(generateSlug(categoryName));
+        newCategory.setSlug(slug);
 
         categoryRepository.save(newCategory);
         return CategoryResponseDTO.toDTO(newCategory);
@@ -90,7 +89,7 @@ public class CategoryService {
 
     public boolean deactivateCategory(String name){
         try {
-            var categoryTarget =  categoryRepository.findByNameCategory(name).get();
+            var categoryTarget =  categoryRepository.findByName(name).get();
 
             if (!categoryTarget.isActive()) {
                 return false;
@@ -114,7 +113,7 @@ public class CategoryService {
 
     // TODO: Garantir que não tenham categorias sobrepostas
     protected boolean isCategoryExists(String name){
-        var category = categoryRepository.findByNameCategory(name);
+        var category = categoryRepository.findByName(name);
         if (category.isPresent()) return true;
         return false;
     }
