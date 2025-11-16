@@ -4,7 +4,11 @@ import com.sousaarthur.blog.modules.category.dto.CategoryResponseDTO;
 import com.sousaarthur.blog.modules.category.dto.UpdateCategoryDTO;
 import com.sousaarthur.blog.modules.category.dto.CreateCategoryDTO;
 import com.sousaarthur.blog.modules.category.service.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +38,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(category);
     }
 
+    // TODO: Modificar para procurar categorias por status
     @GetMapping
     public ResponseEntity<List<CategoryResponseDTO>> getCategories(
             @RequestParam(value = "name", required = false, defaultValue = "") String name,
@@ -69,12 +74,19 @@ public class CategoryController {
     }
 
     @PutMapping("/update")
+    @Operation( description = "Atualiza uma categoria existente com base no id. Pode atualizar o nome ou o slug da categoria")
+    @Parameter( description = "DTO de atualização", required = true)
     public ResponseEntity<CategoryResponseDTO> updateCategory(@RequestBody UpdateCategoryDTO dto) throws InvalidNameException {
         var category = categoryService.updateCategory(dto);
         return ResponseEntity.status(HttpStatus.OK).body(category);
     }
 
     @GetMapping("/disable/{id}")
+    @Operation( description = "Desativa uma determinada categoria com base no id passado")
+    @Parameter( description = "Identificador da categoria", required = true)
+    @ApiResponse( responseCode = "200", description = "A categoria foi desativada com sucesso")
+    @ApiResponse( responseCode = "401", description = "A categoria NÂO foi desativada com sucesso")
+    @ApiResponse( responseCode = "403", description = "não autenticado")
     public ResponseEntity disableCategory(@PathVariable("id") Integer id){
         var deactivate = categoryService.deactivateCategory(id);
         return  ResponseEntity.status(HttpStatus.OK).body(deactivate);
