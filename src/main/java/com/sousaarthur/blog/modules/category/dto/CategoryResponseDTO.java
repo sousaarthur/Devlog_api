@@ -15,6 +15,7 @@ public record CategoryResponseDTO(
                 .id(model.getId())
                 .name(model.getName())
                 .active(model.isActive())
+                .slug(model.getSlug())
                 .build();
     }
 }
