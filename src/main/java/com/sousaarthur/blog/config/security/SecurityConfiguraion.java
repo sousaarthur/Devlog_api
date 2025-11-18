@@ -32,8 +32,8 @@ public class SecurityConfiguraion {
                 .authorizeHttpRequests(authorize -> authorize
                         // Rotas de ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/category/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/register").permitAll()
-
                         // Rotas de Usuários
                         .requestMatchers("/api/user/**").hasRole("WRITER")
                         .requestMatchers("/api/images/upload").hasAnyRole("ADMIN", "WRITER")
